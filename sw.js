@@ -1,5 +1,5 @@
 // Network first: always try for the newest version; use the saved copy only when offline.
-const CACHE = 'dbs-v11';
+const CACHE = 'dbs-v12';
 const FILES = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
