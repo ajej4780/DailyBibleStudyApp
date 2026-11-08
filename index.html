@@ -66,6 +66,7 @@
   .help h4{margin:0 0 6px;font-family:var(--serif);font-size:17px}
   .help ol{margin:0;padding-left:20px;font-size:15px;line-height:1.45}
   .help p{margin:8px 0 0;font-size:13px;color:var(--muted)}
+  .whylink{border:0;background:transparent;padding:0;color:inherit;text-decoration:underline;font-weight:600;font-size:inherit}
   .help .x{position:absolute;top:6px;right:6px;border:0;background:transparent;font-size:20px;line-height:1;padding:6px 8px;color:var(--muted)}
   .wk7{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
   .wk7 div{text-align:center;font-size:12px;color:var(--muted)}
@@ -137,6 +138,9 @@
 <main class="wrap" id="app"></main>
 <dialog id="resetDlg"><p style="margin-top:0">Start this week over? All seven days will be marked not completed and the answers will lock again.</p>
   <div class="actions"><button class="ghost" id="resetNo">Cancel</button><button class="primary" id="resetYes">Start over</button></div></dialog>
+<dialog id="whyDlg"><h4 style="font-family:var(--serif);font-size:19px;margin-bottom:8px">Why a notebook?</h4>
+  <p style="margin:0 0 16px;line-height:1.5">Writing by hand makes you slow down, reread the verse, and put it in your own words. Over the weeks your notebook becomes a record of your study that you can look back on. It also keeps your attention on the text and away from your phone.</p>
+  <button class="primary" id="whyDone" style="width:100%">Close</button></dialog>
 <dialog id="setDlg">
   <h4>Text size</h4><div class="seg" id="segSize"><button data-v="1">A</button><button data-v="1.15" style="font-size:18px">A</button><button data-v="1.3" style="font-size:21px">A</button></div>
   <h4>Appearance</h4><div class="seg" id="segTheme"><button data-v="auto">Automatic</button><button data-v="light">Light</button><button data-v="dark">Dark</button></div>
@@ -264,7 +268,7 @@ function renderHome(){
     <li>Open that day's study and answer the questions in your notebook.</li>
     <li>When you finish, tap <b>Mark Day Complete</b>.</li>
     <li>After all seven days are marked complete, the answers open so you can check your work.</li></ol>
-    <p>Your progress is saved on this phone only.</p></div>`;
+    <p><button class="whylink" data-why style="color:var(--blue)">Why a notebook?</button> · Your progress is saved on this phone only.</p></div>`;
   html += `<div class="tiles">
     <div class="tile"><b>${chapters}</b><span>${chapters === 1 ? 'chapter' : 'chapters'} studied</span></div>
     <div class="tile"><b>${cur}</b><span>day streak${best > cur ? ` · best ${best}` : ''}</span></div>
@@ -313,7 +317,7 @@ function renderWeek(n, d, justUnlocked = false){
   const hasPeople = w.days.some(x => x.keyPeople), done = doneDays(n).length;
   let html = `<div class="sub">Week ${n}</div><h1>${esc(w.title)}</h1>
     <div class="progress" aria-label="${done} of 7 days completed"><i style="width:${done/7*100}%"></i></div>
-    <div class="notebook">📓 Write your answers in your notebook. This page holds the questions only.</div>`;
+    <div class="notebook"><span>📓 Write your answers in your notebook. This page holds the questions only. <button class="whylink" data-why>Why a notebook?</button></span></div>`;
   if (justUnlocked) html += `<div class="banner ok">All seven days are complete. The answers are now open, starting with Day 1.</div>`;
   html += `<div class="tabs">` + w.days.map(x => `<button class="tab ${x.day === d ? 'on' : ''} ${isDone(n, x.day) ? 'done' : ''}" data-go="week-${n}-day-${x.day}">Day<b>${x.day}</b></button>`).join('') + `</div>`;
   html += `<article class="sheet"><div class="dayhead"><span class="d">Day ${d}</span><h2>${esc(day.ref)}</h2></div>
@@ -351,6 +355,9 @@ function renderWeek(n, d, justUnlocked = false){
     document.getElementById('resetYes').onclick = () => { const p = prog(); delete p[n]; ls.set('dbs-progress', p); const st = stats(); if (st.starts) { delete st.starts[n]; ls.set('dbs-stats', st); } dlg.close(); go(`week-${n}-day-1`); }; };
 }
 
+const whyDlg = document.getElementById('whyDlg');
+document.getElementById('whyDone').onclick = () => whyDlg.close();
+app.addEventListener('click', e => { if (e.target.closest('[data-why]')) whyDlg.showModal(); });
 window.addEventListener('hashchange', () => { route(); toTop(); });
 window.addEventListener('pagehide', timerOff);
 route();
