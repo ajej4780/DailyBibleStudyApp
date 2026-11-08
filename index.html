@@ -165,7 +165,8 @@ function setDone(n, d, val){
   const p = prog(); const s = new Set(p[n] || []);
   const had = s.has(d);
   val ? s.add(d) : s.delete(d); p[n] = [...s].sort(); ls.set('dbs-progress', p);
-  if (val && !had){ const st = stats(); const k = dkey(); st.log[k] = (st.log[k] || 0) + 1; ls.set('dbs-stats', st); }
+  if (val && !had){ const st = stats(); const k = dkey(); st.log[k] = (st.log[k] || 0) + 1;
+    st.starts = st.starts || {}; if (!st.starts[n]) st.starts[n] = k; ls.set('dbs-stats', st); }
 }
 
 // ---------- time on a study page (counts only while visible) ----------
@@ -263,11 +264,15 @@ function renderHome(){
     <div class="tile wide"><span>Through the Bible</span><div class="meter"><i style="width:${Math.min(pct,100)}%"></i></div>
       <span>${chapters} of ${TOTAL_CHAPTERS} chapters · ${pct < 1 && pct > 0 ? pct.toFixed(1) : Math.round(pct)}%</span></div>
   </div>`;
-  // this week, Sunday to Saturday
+  // seven days from the day the current study week began; otherwise the last seven days
   const today = new Date(); today.setHours(12,0,0,0);
-  const sun = new Date(today); sun.setDate(today.getDate() - today.getDay());
-  html += `<h3 class="sec">This week</h3><div class="wk7">`;
-  ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach((lbl, i) => { const d = new Date(sun); d.setDate(sun.getDate() + i); const k = dkey(d);
+  let first = new Date(today); first.setDate(today.getDate() - 6); let rowTitle = 'Last 7 days';
+  const ipw = inProgress(), sk = ipw && (st.starts || {})[ipw];
+  if (sk){ const s0 = new Date(sk + 'T12:00'); const diff = Math.round((today - s0) / 864e5);
+    if (diff >= 0 && diff <= 6){ first = s0; rowTitle = `Week ${ipw}`; } }
+  html += `<h3 class="sec">${rowTitle}</h3><div class="wk7">`;
+  const DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  [0,1,2,3,4,5,6].forEach(i => { const d = new Date(first); d.setDate(first.getDate() + i); const k = dkey(d); const lbl = DOW[d.getDay()];
     const cls = d > today ? 'future' : (st.log[k] ? 'on' : '') + (k === dkey(today) ? ' today' : '');
     html += `<div>${lbl}<i class="${cls}" aria-label="${lbl}${st.log[k] ? ', studied' : ''}">${st.log[k] ? '✓' : ''}</i></div>`; });
   html += `</div><p class="muted">Time counts while a study page is open on screen.</p>
@@ -335,7 +340,7 @@ function renderWeek(n, d, justUnlocked = false){
   const rb = document.getElementById('resetBtn');
   if (rb) rb.onclick = () => { const dlg = document.getElementById('resetDlg'); dlg.showModal();
     document.getElementById('resetNo').onclick = () => dlg.close();
-    document.getElementById('resetYes').onclick = () => { const p = prog(); delete p[n]; ls.set('dbs-progress', p); dlg.close(); go(`week-${n}-day-1`); }; };
+    document.getElementById('resetYes').onclick = () => { const p = prog(); delete p[n]; ls.set('dbs-progress', p); const st = stats(); if (st.starts) { delete st.starts[n]; ls.set('dbs-stats', st); } dlg.close(); go(`week-${n}-day-1`); }; };
 }
 
 window.addEventListener('hashchange', () => { route(); toTop(); });
