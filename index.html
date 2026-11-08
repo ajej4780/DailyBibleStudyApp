@@ -92,7 +92,11 @@
   .sq.part::after{content:attr(data-p);position:absolute;top:4px;right:7px;font-size:10px;color:var(--blue);font-weight:600}
   .sq.done{background:var(--ok-soft);border-color:var(--ok)} .sq.done b{color:var(--ok)}
   .sq.done::after{content:"✓";position:absolute;top:2px;right:7px;font-size:14px;color:var(--ok)}
-  .legend{display:flex;gap:14px;font-size:12px;color:var(--muted);margin:10px 0 0}
+  .lg{display:inline-flex;align-items:center;gap:6px}
+  .lgd{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:5px;border:1.5px solid var(--rule2);font-style:normal;font-size:11px}
+  .lgd.done{background:var(--ok-soft);border-color:var(--ok);color:var(--ok)}
+  .lgd.part{border-color:var(--blue)}
+  .legend{align-items:center;display:flex;gap:14px;font-size:12px;color:var(--muted);margin:10px 0 0}
   /* week */
   .progress{height:6px;background:var(--track);border-radius:99px;overflow:hidden;margin:6px 0 0}
   .progress i{display:block;height:100%;background:var(--ok)}
@@ -314,7 +318,7 @@ function renderStudy(){
   setBack('Home', 'home');
   const p = prog();
   let html = `<h1>All Weeks</h1><div class="sub">One chapter per day · ${WEEKS.length} weeks</div>
-    <div class="legend"><span style="color:var(--ok)">✓ Complete</span><span style="color:var(--blue)">3/7 In progress</span><span class="spacer"></span><button class="whylink" id="catchBtn" style="color:var(--blue)">Catch up</button></div><div class="grid">`;
+    <div class="legend"><span class="lg"><i class="lgd done">✓</i>Complete</span><span class="lg"><i class="lgd part"></i>In progress (days done)</span><span class="spacer"></span><button class="whylink" id="catchBtn" style="color:var(--blue)">Catch up</button></div><div class="grid">`;
   for (const w of WEEKS){
     const c = (p[w.week] || []).length, cls = c === 7 ? 'done' : c ? 'part' : '';
     html += `<button class="sq ${cls}" data-w="${w.week}" data-p="${c}/7" aria-label="Week ${w.week}, ${esc(w.title)}${c === 7 ? ', complete' : c ? ', ' + c + ' of 7 days' : ''}"><b>${w.week}</b><small>${esc(short(w.title))}</small></button>`;
