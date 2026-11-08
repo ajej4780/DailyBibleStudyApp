@@ -173,7 +173,7 @@ let tStart = null;
 function timerOn(){ if (tStart === null && document.visibilityState === 'visible') tStart = Date.now(); }
 function timerOff(){
   if (tStart === null) return;
-  const s = Math.min((Date.now() - tStart) / 1000, 7200); tStart = null;
+  const s = Math.min((Date.now() - tStart) / 1000, 3600); tStart = null;
   const st = stats(); st.secs = (st.secs || 0) + s; ls.set('dbs-stats', st);
 }
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible'){ if (/^#week-/.test(location.hash)) timerOn(); } else timerOff(); });
