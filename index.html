@@ -73,6 +73,7 @@
   .wk7 i.on{background:var(--ok)}
   .wk7 i.today{outline:2px solid var(--blue);outline-offset:1px}
   .wk7 i.future{background:transparent;border:1px dashed var(--rule2)}
+  .go.top{margin:0 0 14px}
   .go{display:block;width:100%;border:1px solid var(--rule2);background:var(--card);border-radius:14px;padding:14px;font-weight:600;font-size:16px;margin:18px 0 0}
   /* study grid */
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;margin-top:14px}
@@ -256,6 +257,7 @@ function renderHome(){
   const pp = prog(); const ip = Object.keys(pp).map(Number).filter(k => k !== latest && (pp[k]||[]).length > 0 && (pp[k]||[]).length < 7).sort((a, b) => b - a)[0];
   if (ip){ const d = firstOpenDay(ip);
     html += `<button class="cont2" data-go="week-${ip}-day-${d}"><small>Continue</small><span>Week ${ip}, Day ${d}: ${esc(byNum[ip].days[d-1].ref)}</span></button>`; }
+  html += `<button class="go top" data-go="study">📖 All weeks ›</button>`;
   if (!prefs().helpHidden) html += `<div class="help"><button class="x" id="helpX" aria-label="Hide these instructions">✕</button>
     <h4>How to use this app</h4><ol>
     <li>Read one chapter of the Bible each day.</li>
@@ -282,8 +284,7 @@ function renderHome(){
   [0,1,2,3,4,5,6].forEach(i => { const d = new Date(first); d.setDate(first.getDate() + i); const k = dkey(d); const lbl = DOW[d.getDay()];
     const cls = d > today ? 'future' : (st.log[k] ? 'on' : '') + (k === dkey(today) ? ' today' : '');
     html += `<div>${lbl}<i class="${cls}" aria-label="${lbl}${st.log[k] ? ', studied' : ''}">${st.log[k] ? '✓' : ''}</i></div>`; });
-  html += `</div><p class="muted">Time counts while a study page is open on screen.</p>
-    <button class="go" data-go="study">All weeks ›</button>`;
+  html += `</div><p class="muted">Time counts while a study page is open on screen.</p>`;
   app.innerHTML = html;
   app.querySelectorAll('[data-go]').forEach(b => b.onclick = () => go(b.dataset.go));
   const hx = document.getElementById('helpX');
