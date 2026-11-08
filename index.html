@@ -145,6 +145,12 @@
 <dialog id="whyDlg"><h4 style="font-family:var(--serif);font-size:19px;margin-bottom:8px">Why a notebook?</h4>
   <p style="margin:0 0 16px;line-height:1.5">Writing by hand makes you slow down, reread the verse, and put it in your own words. Over the weeks your notebook becomes a record of your study that you can look back on. It also keeps your attention on the text and away from your phone.</p>
   <button class="primary" id="whyDone" style="width:100%">Close</button></dialog>
+<dialog id="catchDlg"><h4 style="font-family:var(--serif);font-size:19px;margin-bottom:6px">Catch up</h4>
+  <p style="margin:0 0 12px;line-height:1.45">Already working through the study on paper? Mark the weeks you have finished so the app starts where you are.</p>
+  <label for="catchN" style="font-weight:600;font-size:15px">I have finished Week 1 through Week</label>
+  <input id="catchN" type="number" inputmode="numeric" min="1" style="width:100%;margin:8px 0 6px;padding:12px;font-size:18px;border:1px solid var(--rule2);border-radius:10px;background:var(--paper);color:var(--ink)">
+  <p id="catchMsg" class="muted" style="margin:0 0 14px;min-height:18px"></p>
+  <div class="actions" style="margin:0"><button class="ghost" id="catchNo">Cancel</button><button class="primary" id="catchYes">Mark complete</button></div></dialog>
 <dialog id="setDlg">
   <h4>Text size</h4><div class="seg" id="segSize"><button data-v="1">A</button><button data-v="1.15" style="font-size:18px">A</button><button data-v="1.3" style="font-size:21px">A</button></div>
   <h4>Appearance</h4><div class="seg" id="segTheme"><button data-v="auto">Automatic</button><button data-v="light">Light</button><button data-v="dark">Dark</button></div>
@@ -272,6 +278,7 @@ function renderHome(){
     <li>Open that day's study and answer the questions in your notebook.</li>
     <li>When you finish, tap <b>Mark Day Complete</b>.</li>
     <li>After all seven days are marked complete, the answers open so you can check your work.</li></ol>
+    <p style="color:var(--ink);font-size:14px">Already partway through the study? Tap <b>All weeks</b>, then <b>Catch up</b>.</p>
     <p><button class="whylink" data-why style="color:var(--blue)">Why a notebook?</button> · Your progress is saved on this phone only. Study time counts while a study page is open on screen.</p></div>`;
   // seven days from the day the current study week began; otherwise the last seven days
   const today = new Date(); today.setHours(12,0,0,0);
@@ -304,13 +311,27 @@ function renderStudy(){
   setBack('Home', 'home');
   const p = prog();
   let html = `<h1>All Weeks</h1><div class="sub">One chapter per day · ${WEEKS.length} weeks</div>
-    <div class="legend"><span style="color:var(--ok)">✓ Complete</span><span style="color:var(--blue)">3/7 In progress</span></div><div class="grid">`;
+    <div class="legend"><span style="color:var(--ok)">✓ Complete</span><span style="color:var(--blue)">3/7 In progress</span><span class="spacer"></span><button class="whylink" id="catchBtn" style="color:var(--blue)">Catch up</button></div><div class="grid">`;
   for (const w of WEEKS){
     const c = (p[w.week] || []).length, cls = c === 7 ? 'done' : c ? 'part' : '';
     html += `<button class="sq ${cls}" data-w="${w.week}" data-p="${c}/7" aria-label="Week ${w.week}, ${esc(w.title)}${c === 7 ? ', complete' : c ? ', ' + c + ' of 7 days' : ''}"><b>${w.week}</b><small>${esc(short(w.title))}</small></button>`;
   }
   app.innerHTML = html + `</div>`;
   app.querySelectorAll('[data-w]').forEach(b => b.onclick = () => go('week-' + b.dataset.w));
+  document.getElementById('catchBtn').onclick = openCatch;
+}
+function openCatch(){
+  const dlg = document.getElementById('catchDlg'), inp = document.getElementById('catchN'), msg = document.getElementById('catchMsg');
+  const maxW = WEEKS[WEEKS.length - 1].week;
+  inp.max = maxW; inp.value = ''; msg.textContent = `Weeks 1 to ${maxW} are available.`;
+  inp.oninput = () => { const n = +inp.value; msg.textContent = n >= 1 && n <= maxW ? `Weeks 1 to ${n} will be marked complete (${(n * 7).toLocaleString()} chapters). Their answers will open.` : `Enter a number from 1 to ${maxW}.`; };
+  document.getElementById('catchNo').onclick = () => dlg.close();
+  document.getElementById('catchYes').onclick = () => {
+    const n = Math.floor(+inp.value); if (!(n >= 1 && n <= maxW)) { inp.focus(); return; }
+    const p = prog(); for (const w of WEEKS) if (w.week <= n) p[w.week] = [1,2,3,4,5,6,7]; ls.set('dbs-progress', p);
+    dlg.close(); renderStudy();
+  };
+  dlg.showModal(); setTimeout(() => inp.focus(), 50);
 }
 
 // ---------- week / day ----------
