@@ -319,7 +319,7 @@ function renderStudy(){
   setBack('Home', 'home');
   const p = prog(); const nu = nextUp(); const curW = nu ? nu[0] : null;
   let html = `<h1>All Weeks</h1><div class="sub">One chapter per day · ${WEEKS.length} weeks</div>
-    <div class="legend"><span class="lg"><i class="lgd done">✓</i>Complete</span><span class="lg"><i class="lgd part"></i>In progress (days done)</span><span class="spacer"></span><button class="whylink" id="catchBtn" style="color:var(--blue)">Catch up</button></div><div class="grid">`;
+    <div class="legend"><span class="muted">Already partway through? </span><button class="whylink" id="catchBtn" style="color:var(--blue);font-size:13px">Catch up</button></div><div class="grid">`;
   for (const w of WEEKS){
     const c = (p[w.week] || []).length, cls = (c === 7 ? 'done' : c ? 'part' : '') + (w.week === curW ? ' cur' : '');
     html += `<button class="sq ${cls}" data-w="${w.week}" data-p="${c}/7" aria-label="Week ${w.week}, ${esc(w.title)}${c === 7 ? ', complete' : c ? ', ' + c + ' of 7 days' : ''}"><b>${w.week}</b><small>${esc(short(w.title))}</small></button>`;
