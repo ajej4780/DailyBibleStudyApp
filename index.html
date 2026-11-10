@@ -109,14 +109,26 @@
   .tab.on{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue) inset}
   .tab.done{background:var(--ok-soft);border-color:var(--ok)}
   .tab.done b::after{content:" ✓";color:var(--ok)}
-  .sheet{background:var(--card);border:1px solid var(--rule);border-radius:16px;padding:18px 18px 8px;margin-top:10px}
+  .sheet{margin-top:10px}
+  .sheet .dayhead{padding:4px 2px 10px}
+  .scard{background:var(--card);border:1px solid var(--rule);border-radius:14px;overflow:hidden;margin:0 0 14px}
+  .shead{display:flex;align-items:center;gap:10px;margin:0;padding:11px 14px;font-family:var(--serif);font-size:18px;font-weight:700;color:#fff;border:0}
+  .shead svg{width:22px;height:22px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .shead.bpic{background:#002858}.shead.bpic svg{color:#febc21}
+  .shead.exam{background:#185FA5}
+  .shead.refl{background:#febc21;color:#3a2a05}
+  .sbody{padding:6px 14px 10px}
+  .scard .reflect{background:none;border:0;border-radius:0;margin:0;padding:12px 14px}
   .dayhead{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
   .dayhead .d{color:var(--blue);font-weight:700;font-size:14px;text-transform:uppercase;letter-spacing:.6px}
   .dayhead h2{font-family:var(--serif);font-size:24px;margin:0;color:var(--blue)}
   h3{font-family:var(--serif);font-size:17px;margin:20px 0 8px;padding-bottom:6px;border-bottom:1px solid var(--rule)}
-  .bp{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;align-items:baseline}
-  .bp .k{font-weight:600;font-size:15px;white-space:nowrap}
-  .bp .v{min-height:24px;border-bottom:1px dashed var(--rule)}
+  .bp .row{padding:9px 0;border-bottom:1px dotted var(--rule2)}
+  .bp .row:last-child{border-bottom:0}
+  .bp .k{font-weight:600;font-size:16px}
+  .bp .k .ic{display:inline-block;width:1.6em}
+  .bp .v .ans{margin:2px 0 0 1.6em}
+  @media (min-width:600px){.bp .row{display:grid;grid-template-columns:210px 1fr;align-items:baseline}.bp .v .ans{margin:0}}
   ol.q{margin:0;padding-left:0;list-style:none;counter-reset:q}
   ol.q>li{counter-increment:q;position:relative;padding:8px 0 10px 30px;border-bottom:1px dashed var(--rule);font-family:var(--serif);font-size:17px;line-height:1.45}
   ol.q>li:last-child{border-bottom:0}
@@ -349,7 +361,11 @@ function openCatch(){
 }
 
 // ---------- week / day ----------
-const BP = [['keyVerse','Key Verse'],['keyWord','Key Word'],['crossRefs','Cross References'],['keyPeople','Key People'],['paraphrase','Paraphrase']];
+const BP = [['keyVerse','Key Verse','📖'],['keyWord','Key Word','🔑'],['crossRefs','Cross References','🔗'],['keyPeople','Key People','👤'],['paraphrase','Paraphrase','📝']];
+const SICON = {
+  bpic:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="7" cy="16" r="3"/><circle cx="17" cy="16" r="3"/><path d="M16.35 9.17l-.73-1.26c-.16-.25-1.06-.2-1.12.09l-.18 1.38M19.76 14.81l-2.84-5.13c-.19-.31-.59-.68-1.42-.68c-.83 0-1.5.45-1.5 1v6M7.65 9.17l.73-1.26c.16-.25 1.06-.2 1.12.09l.18 1.38M4.24 14.81l2.84-5.13c.19-.31.59-.68 1.42-.68c.83 0 1.5.45 1.5 1v6M10 12h4v2h-4z"/></svg>',
+  exam:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="10" r="7"/><path d="M21 21l-6-6"/></svg>',
+  refl:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h1m8-9v1m8 8h1M5.6 5.6l.7.7m12.1-.7l-.7.7M9 16a5 5 0 1 1 6 0a3.5 3.5 0 0 0-1 3a2 2 0 0 1-4 0a3.5 3.5 0 0 0-1-3M9.7 17h4.6"/></svg>'};
 function renderWeek(n, d, justUnlocked = false){
   setBack('Weeks', 'study');
   const w = byNum[n], day = w.days[d - 1], open = unlocked(n);
@@ -360,15 +376,15 @@ function renderWeek(n, d, justUnlocked = false){
   if (justUnlocked) html += `<div class="banner ok">All seven days are complete. The answers are now open, starting with Day 1.</div>`;
   html += `<div class="tabs">` + w.days.map(x => `<button class="tab ${x.day === d ? 'on' : ''} ${isDone(n, x.day) ? 'done' : ''}" data-go="week-${n}-day-${x.day}">Day<b>${x.day}</b></button>`).join('') + `</div>`;
   html += `<article class="sheet"><div class="dayhead"><span class="d">Day ${d}</span><h2>${esc(day.ref)}</h2></div>
-    <h3>Getting the Big Picture</h3><div class="bp">` +
-    BP.filter(([k]) => k !== 'keyPeople' || hasPeople).map(([k, label]) =>
-      `<div class="k">${label}:</div><div class="v">${open && day[k] ? `<span class="ans">${esc(day[k])}</span>` : ''}</div>`).join('') +
-    `</div><h3>Examining the Text</h3><ol class="q">` +
+    <section class="scard"><h3 class="shead bpic">${SICON.bpic}Getting the Big Picture</h3><div class="sbody bp">` +
+    BP.filter(([k]) => k !== 'keyPeople' || hasPeople).map(([k, label, ic]) =>
+      `<div class="row"><div class="k"><span class="ic" aria-hidden="true">${ic}</span>${label}:</div><div class="v">${open && day[k] ? `<span class="ans">${esc(day[k])}</span>` : ''}</div></div>`).join('') +
+    `</div></section><section class="scard"><h3 class="shead exam">${SICON.exam}Examining the Text</h3><div class="sbody"><ol class="q">` +
     day.questions.map(q => `<li>${esc(q.q)}` +
       (q.parts ? `<ul class="parts">${q.parts.map(p => `<li>${esc(p.q)}${open && p.a ? `<span class="ans inline">${esc(p.a)}</span>` : ''}</li>`).join('')}</ul>` : '') +
       (open && q.a ? `<span class="ans">${esc(q.a)}</span>` : '') + `</li>`).join('') +
-    `</ol>` + (open ? '' : `<p class="lock">🔒 Answers open after all seven days are marked complete.</p>`) +
-    (day.reflection ? `<div class="reflect"><b>Reflection</b>${esc(day.reflection)}</div>` : '') + `</article>`;
+    `</ol>` + (open ? '' : `<p class="lock">🔒 Answers open after all seven days are marked complete.</p>`) + `</div></section>` +
+    (day.reflection ? `<section class="scard"><h3 class="shead refl">${SICON.refl}Reflection</h3><div class="reflect">${esc(day.reflection)}</div></section>` : '') + `</article>`;
   const thisDone = isDone(n, d);
   if (!open) html += `<div class="actions"><button class="primary ${thisDone ? 'done' : ''}" id="markBtn">${thisDone ? '☑ Completed' : '☐ Mark Day ' + d + ' Complete'}</button></div>`;
   const nextW = byNum[n + 1];
